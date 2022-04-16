@@ -27,9 +27,10 @@ class AutoLogin:
         if WebDriverWait(self.driver, 180).until(EC.presence_of_element_located((By.ID, 'aPublicCourse'))):
             time.sleep(1)  # waiting for loading
             cookie_lis = self.driver.get_cookies()
-            cookies = ''
-            for item in cookie_lis:
-                cookies += item['name'] + '=' + item['value'] + '; '
+            cookies = ''.join(
+                item['name'] + '=' + item['value'] + '; ' for item in cookie_lis
+            )
+
             token = self.driver.execute_script('return sessionStorage.getItem("token");')
             batch_str = self.driver. \
                 execute_script('return sessionStorage.getItem("currentBatch");').replace('null', 'None').replace('false', 'False').replace('true', 'True')

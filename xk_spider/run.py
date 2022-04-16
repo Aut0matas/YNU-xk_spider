@@ -45,11 +45,15 @@ headers['cookie'], headers['token'], batchCode = al.get_params()
 gc = GetCourse(headers, stdCode, batchCode)
 
 ec = ThreadPoolExecutor()
-taskList = []
-for course in publicCourses:
-    taskList.append(ec.submit(gc.judge, course[0], course[1], key, kind='素选'))
-for course in programCourse:
-    taskList.append(ec.submit(gc.judge, course[0], course[1], key, kind='主修'))
+taskList = [
+    ec.submit(gc.judge, course[0], course[1], key, kind='素选')
+    for course in publicCourses
+]
+
+taskList.extend(
+    ec.submit(gc.judge, course[0], course[1], key, kind='主修')
+    for course in programCourse
+)
 
 for future in as_completed(taskList):
     print(future.result())

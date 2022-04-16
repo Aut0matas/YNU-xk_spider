@@ -6,14 +6,14 @@ from requests.exceptions import HTTPError
 
 
 def to_wechat(key, title, string):
-    url = 'https://sc.ftqq.com/' + key + '.send'
+    url = f'https://sc.ftqq.com/{key}.send'
     dic = {
         'text': title,
         'desp': string
     }
     requests.get(url, params=dic)
 
-    return title + '：已发送至微信'
+    return f'{title}：已发送至微信'
 
 
 class GetCourse:
@@ -37,7 +37,7 @@ class GetCourse:
         elif kind == '主修':
             kind = 'programCourse.do'
             classtype = "FANKC"
-        url = 'http://xk.ynu.edu.cn/xsxkapp/sys/xsxkapp/elective/' + kind
+        url = f'http://xk.ynu.edu.cn/xsxkapp/sys/xsxkapp/elective/{kind}'
 
         while True:
             try:
@@ -49,7 +49,7 @@ class GetCourse:
                     if flag > 2:
                         to_wechat(key, f'{course_name} 查询失败，请检查失败原因', '线程结束')
                         return False
-                    print(f'[warning]: jugde()函数正尝试再次爬取')
+                    print('[warning]: jugde()函数正尝试再次爬取')
                     time.sleep(3)
                     r = requests.post(url, data=query, headers=self.headers)
 
@@ -59,7 +59,7 @@ class GetCourse:
                     setcookie = ''
                 if setcookie:
                     print(f'[set-cookie]: {setcookie}')
-                    update = re.search(r'_WEU=.+?; ', setcookie).group(0)
+                    update = re.search(r'_WEU=.+?; ', setcookie)[0]
                     self.headers['cookie'] = re.sub(r'_WEU=.+?; ', update, self.headers['cookie'])
 
                     print(f'[current cookie]: {self.headers["cookie"]}')
@@ -106,7 +106,7 @@ class GetCourse:
             if flag > 2:
                 to_wechat(key, f'{classname} 有余课，但post未成功', '线程结束')
                 break
-            print(f'[warning]: post_add()函数正尝试再次请求')
+            print('[warning]: post_add()函数正尝试再次请求')
             time.sleep(3)
             r = requests.post(url, headers=self.headers, data=query)
             flag += 1
@@ -114,7 +114,7 @@ class GetCourse:
         messge_str = r.text.replace('null', 'None').replace('false', 'False').replace('true', 'True')
         messge = ast.literal_eval(messge_str)['msg']
         title = '抢课结果'
-        string = '[' + teacher + ']' + classname + ': ' + messge
+        string = f'[{teacher}]{classname}: {messge}'
         to_wechat(key, title, string)
         return string
 
@@ -130,11 +130,7 @@ class GetCourse:
                 "teachingClassType": classtype
             }
         }
-        query = {
-            'addParam': str(post_course)
-        }
-
-        return query
+        return {'addParam': str(post_course)}
 
     def __judge_datastruct(self, course, classtype) -> dict:
         data = {
@@ -152,11 +148,7 @@ class GetCourse:
             "pageNumber": "0",
             "order": ""
         }
-        query = {
-            'querySetting': str(data)
-        }
-
-        return query
+        return {'querySetting': str(data)}
 
     # def update_cookie(self, string):
     #     if '_WEU' in string:
